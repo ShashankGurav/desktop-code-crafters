@@ -1,174 +1,375 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CogniSense</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <main class="panel panel-full" id="panel" data-state="connecting">
-      <header class="topbar drag-region">
-        <div class="brand">
-          <span class="brand-dot" aria-hidden="true"></span>
-          <span class="brand-name">CogniSense</span>
-        </div>
-        <div class="topbar-actions no-drag">
-          <span class="status-pill" id="statusPill">Session</span>
-          <button id="minBtn" class="window-btn" aria-label="Minimize">-</button>
-          <button id="closeBtn" class="window-btn" aria-label="Close">x</button>
-        </div>
-      </header>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CogniSense</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<main class="panel panel-full" id="panel" data-state="connecting">
 
-      <section id="pageOnboarding" class="page active">
-        <p class="eyebrow">Welcome</p>
-        <h1 class="headline">Your calm cognitive companion.</h1>
-        <p class="copy">CogniSense observes activity patterns and keeps this panel calm while guiding you through three brief screens—onboarding, permissions, and the live feature view.</p>
-        <ul class="bullet-list">
-          <li>Private local agent</li>
-          <li>Real-time state updates</li>
-          <li>Non-intrusive floating panel</li>
-        </ul>
-        <button id="toPermissionsBtn" class="primary-btn" type="button">Continue</button>
-      </section>
+  <!-- ── Top bar ── -->
+  <header class="topbar drag-region">
+    <div class="brand">
+      <span class="brand-dot" aria-hidden="true"></span>
+      <span class="brand-name">CogniSense</span>
+    </div>
+    <div class="topbar-actions no-drag">
+      <span class="status-pill" id="statusPill">Session</span>
+      <button id="minBtn"   class="window-btn" aria-label="Minimize">−</button>
+      <button id="closeBtn" class="window-btn" aria-label="Close">✕</button>
+    </div>
+  </header>
 
-      <section id="pagePermissions" class="page">
-        <p class="eyebrow">Permissions</p>
-        <h2 class="title">Choose what this session can read</h2>
-        <div class="permission-grid">
-          <label class="permission-item"><input id="permKeyboard" type="checkbox" checked /> Keyboard activity</label>
-          <label class="permission-item"><input id="permMouse" type="checkbox" checked /> Mouse activity</label>
-          <label class="permission-item"><input id="permWindow" type="checkbox" checked /> Window focus</label>
-          <label class="permission-item"><input id="permSystem" type="checkbox" checked /> System metrics</label>
-        </div>
-        <p class="copy">Adjust any of these as you move toward the live session. You can revisit them later inside Settings on the feature screen.</p>
-        <div class="row-actions">
-          <button id="backToOnboardingBtn" class="ghost-btn" type="button">Back</button>
-          <button id="toFeatureBtn" class="primary-btn" type="button">Start Session</button>
-        </div>
-      </section>
+  <!-- ══════════════════════════════════════════
+       PAGE 1 — ONBOARDING
+  ═══════════════════════════════════════════ -->
+  <section id="pageOnboarding" class="page active">
+    <div class="ob-hero">
+      <p class="ob-eyebrow">Welcome</p>
+      <h1 class="ob-headline">Your quiet<br>cognitive companion.</h1>
+      <p class="ob-sub">CogniSense watches how you work — not what you type — and reflects your cognitive state back to you every 30 seconds.</p>
+    </div>
 
-      <section id="pageFeature" class="page">
-        <div id="iconModeCard" class="icon-mode-card drag-region">
-          <div class="icon-orb" id="iconOrb">C</div>
+    <div class="ob-pills">
+      <div class="ob-pill">
+        <div class="ob-pill-icon purple">🧠</div>
+        <div class="ob-pill-text">
+          <strong>Runs entirely local</strong>
+          <span>No data ever leaves your machine</span>
         </div>
+      </div>
+      <div class="ob-pill">
+        <div class="ob-pill-icon teal">👁</div>
+        <div class="ob-pill-text">
+          <strong>Rhythm, not content</strong>
+          <span>Timing &amp; movement — never keystrokes</span>
+        </div>
+      </div>
+      <div class="ob-pill">
+        <div class="ob-pill-icon amber">⚡</div>
+        <div class="ob-pill-text">
+          <strong>Real-time state</strong>
+          <span>Focus, flow, distraction — updated live</span>
+        </div>
+      </div>
+    </div>
 
-        <div id="mainDashboard" class="dashboard-grid">
-          <div class="compact-view drag-region">
-            <div class="compact-header">
-              <div class="compact-title-group">
-                <span class="state-badge" id="compactStateBadge">FATIGUE</span>
-                <p class="compact-time" id="compactTime">--:--</p>
-              </div>
-              <button id="compactMenuBtn" class="compact-menu-btn no-drag" type="button">⋮</button>
+    <div class="step-dots">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <div class="btn-row" style="padding: 0 0 4px;">
+      <button id="toPermissionsBtn" class="btn btn-primary" type="button">Continue</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PAGE 2 — PERMISSIONS
+  ═══════════════════════════════════════════ -->
+  <section id="pagePermissions" class="page">
+    <div class="perm-header">
+      <p class="perm-eyebrow">Permissions</p>
+      <h2 class="perm-title">Choose what to observe</h2>
+      <p class="perm-sub">You can change these any time in Settings.</p>
+    </div>
+
+    <div class="perm-list">
+      <label class="perm-item">
+        <div class="perm-item-icon purple">⌨️</div>
+        <div class="perm-item-body">
+          <div class="perm-item-name">Keyboard rhythm</div>
+          <div class="perm-item-desc">Timing between keystrokes — not content</div>
+        </div>
+        <label class="ios-toggle">
+          <input id="permKeyboard" type="checkbox" checked/>
+          <div class="ios-track"></div>
+          <div class="ios-thumb"></div>
+        </label>
+      </label>
+
+      <label class="perm-item">
+        <div class="perm-item-icon teal">🖱</div>
+        <div class="perm-item-body">
+          <div class="perm-item-name">Mouse movement</div>
+          <div class="perm-item-desc">Speed, path shape &amp; pauses</div>
+        </div>
+        <label class="ios-toggle">
+          <input id="permMouse" type="checkbox" checked/>
+          <div class="ios-track"></div>
+          <div class="ios-thumb"></div>
+        </label>
+      </label>
+
+      <label class="perm-item">
+        <div class="perm-item-icon amber">🪟</div>
+        <div class="perm-item-body">
+          <div class="perm-item-name">Window focus</div>
+          <div class="perm-item-desc">Active app &amp; switch frequency</div>
+        </div>
+        <label class="ios-toggle">
+          <input id="permWindow" type="checkbox" checked/>
+          <div class="ios-track"></div>
+          <div class="ios-thumb"></div>
+        </label>
+      </label>
+
+      <label class="perm-item">
+        <div class="perm-item-icon green">📊</div>
+        <div class="perm-item-body">
+          <div class="perm-item-name">System metrics</div>
+          <div class="perm-item-desc">CPU &amp; RAM as cognitive context</div>
+        </div>
+        <label class="ios-toggle">
+          <input id="permSystem" type="checkbox" checked/>
+          <div class="ios-track"></div>
+          <div class="ios-thumb"></div>
+        </label>
+      </label>
+    </div>
+
+    <div class="privacy-note">
+      <span class="privacy-note-icon">🔒</span>
+      <p class="privacy-note-text">All processing is on-device. No keystrokes, screen content, or personal data is recorded or transmitted.</p>
+    </div>
+
+    <div class="step-dots" style="margin-top: 12px;">
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <div class="btn-row">
+      <button id="backToOnboardingBtn" class="btn btn-ghost" type="button">Back</button>
+      <button id="toFeatureBtn"        class="btn btn-primary" type="button">Start Session</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PAGE 3 — FEATURE / TRACKING
+  ═══════════════════════════════════════════ -->
+  <section id="pageFeature" class="page">
+
+    <!-- ── ICON view ── -->
+    <div class="icon-wrap drag-region">
+      <div style="position:relative; display:flex; align-items:center; justify-content:center;">
+        <div class="icon-ring"></div>
+        <div class="icon-ring"></div>
+        <div class="icon-ring"></div>
+        <div class="icon-orb" id="iconOrb" data-letter="F"></div>
+      </div>
+    </div>
+
+    <!-- ── MINI view ── -->
+    <div class="mini-wrap">
+      <div class="mini-state-row">
+        <span class="mini-state-name" id="miniStateName">Focused</span>
+        <span class="mini-conf-pill"  id="miniConf">91%</span>
+      </div>
+      <p class="mini-msg" id="miniMsg">Deep focus detected</p>
+
+      <div class="mini-cards">
+        <div class="mini-card">
+          <span class="mini-card-label">Typing</span>
+          <div>
+            <span class="mini-card-value" id="miniTyping">—</span>
+            <span class="mini-card-unit">k/s</span>
+          </div>
+          <span class="mini-card-sub">keys per second</span>
+        </div>
+        <div class="mini-card">
+          <span class="mini-card-label">Mouse speed</span>
+          <div>
+            <span class="mini-card-value" id="miniMouse">—</span>
+            <span class="mini-card-unit">px/s</span>
+          </div>
+          <span class="mini-card-sub">avg velocity</span>
+        </div>
+        <div class="mini-card">
+          <span class="mini-card-label">Switches</span>
+          <div>
+            <span class="mini-card-value" id="miniSwitches">—</span>
+          </div>
+          <span class="mini-card-sub">window / 30s</span>
+        </div>
+        <div class="mini-card">
+          <span class="mini-card-label">CPU</span>
+          <div>
+            <span class="mini-card-value" id="miniCpu">—</span>
+            <span class="mini-card-unit">%</span>
+          </div>
+          <span class="mini-card-sub">system load</span>
+        </div>
+      </div>
+
+      <div class="mini-bottom-row no-drag">
+        <div class="live-dot"></div>
+        <span class="mini-bottom-label" id="miniTime">--:--</span>
+        <div class="mini-mode-btns">
+          <button class="mode-btn" id="miniToIcon"  type="button">Icon</button>
+          <button class="mode-btn active"            type="button">Mini</button>
+          <button class="mode-btn" id="miniToFull"  type="button">Full</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FULL view ── -->
+    <div class="full-wrap no-drag">
+
+      <div class="dash-header">
+        <div class="mode-switch">
+          <button class="mode-btn" id="modeIconBtn" type="button">Icon</button>
+          <button class="mode-btn" id="modeMiniBtn" type="button">Mini</button>
+          <button class="mode-btn active" id="modeFullBtn" type="button">Full</button>
+        </div>
+        <button class="settings-btn" id="openSettingsBtn" type="button" aria-label="Settings">⚙</button>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero-card">
+        <div class="hero-glow"></div>
+        <div class="hero-top">
+          <h2 class="hero-state" id="heroState">Connecting</h2>
+          <span class="hero-conf" id="heroConf">--%</span>
+        </div>
+        <p class="hero-msg" id="heroMsg">Initializing session...</p>
+        <div class="conf-bar-bg">
+          <div class="conf-bar-fill" id="confBarFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="metrics-section">
+        <div class="metric-card">
+          <div class="metric-accent purple">⌨️</div>
+          <div class="metric-label">Typing speed</div>
+          <div>
+            <span class="metric-value" id="fullTyping">—</span>
+            <span class="metric-unit">k/s</span>
+          </div>
+          <div class="metric-sub" id="fullTypingSub">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-accent teal">🖱</div>
+          <div class="metric-label">Mouse speed</div>
+          <div>
+            <span class="metric-value" id="fullMouse">—</span>
+            <span class="metric-unit">px/s</span>
+          </div>
+          <div class="metric-sub" id="fullMouseSub">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-accent amber">🪟</div>
+          <div class="metric-label">Window switches</div>
+          <div>
+            <span class="metric-value" id="fullSwitches">—</span>
+          </div>
+          <div class="metric-sub" id="fullSwitchesSub">per window</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-accent green">📊</div>
+          <div class="metric-label">System load</div>
+          <div>
+            <span class="metric-value" id="fullCpu">—</span>
+            <span class="metric-unit">%</span>
+          </div>
+          <div class="metric-sub" id="fullCpuSub">—</div>
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div class="details-card">
+        <div class="details-card-title">Session details</div>
+        <div class="detail-row">
+          <span>State</span>
+          <strong id="detailState">—</strong>
+        </div>
+        <div class="detail-row">
+          <span>Confidence</span>
+          <strong id="detailConf">—</strong>
+        </div>
+        <div class="detail-row">
+          <span>Driving signals</span>
+          <strong id="detailSignals">—</strong>
+        </div>
+        <div class="detail-row">
+          <span>Last updated</span>
+          <strong id="detailTime">—</strong>
+        </div>
+      </div>
+
+      <!-- Settings panel -->
+      <div class="settings-panel" id="settingsPanel">
+        <div class="settings-inner">
+
+          <div>
+            <div class="settings-group-title">Glass appearance</div>
+            <div class="slider-row">
+              <span class="slider-name">Blur</span>
+              <input id="blurRange" type="range" min="8" max="36" value="20"/>
+              <span class="slider-val" id="blurVal">20</span>
             </div>
-            <p class="compact-message" id="compactMessage">Monitoring...</p>
-            <div class="compact-video">
-              <div class="video-screen">
-                <div class="video-hud">Live Focus Stream</div>
-                <div class="video-bars">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-                <div class="video-glow"></div>
+            <div class="slider-row">
+              <span class="slider-name">Refraction</span>
+              <input id="refractRange" type="range" min="0" max="30" value="10"/>
+              <span class="slider-val" id="refractVal">10</span>
+            </div>
+            <div class="slider-row">
+              <span class="slider-name">Depth</span>
+              <input id="depthRange" type="range" min="6" max="40" value="18"/>
+              <span class="slider-val" id="depthVal">18</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="settings-group-title">Session permissions</div>
+            <div class="set-perm-list">
+              <div class="set-perm-row">
+                <span>Keyboard rhythm</span>
+                <label class="ios-toggle">
+                  <input id="setPermKeyboard" type="checkbox" checked/>
+                  <div class="ios-track"></div><div class="ios-thumb"></div>
+                </label>
               </div>
-              <div class="video-highlights">
-                <article>
-                  <span>Focus</span>
-                  <strong id="compactConfidence">--%</strong>
-                </article>
-                <article>
-                  <span>Rhythm</span>
-                  <strong id="compactActivity">-</strong>
-                </article>
-                <article>
-                  <span>Motion</span>
-                  <strong id="compactMotion">-</strong>
-                </article>
-                <article>
-                  <span>Signal</span>
-                  <strong id="compactSignal">-</strong>
-                </article>
+              <div class="set-perm-row">
+                <span>Mouse movement</span>
+                <label class="ios-toggle">
+                  <input id="setPermMouse" type="checkbox" checked/>
+                  <div class="ios-track"></div><div class="ios-thumb"></div>
+                </label>
+              </div>
+              <div class="set-perm-row">
+                <span>Window focus</span>
+                <label class="ios-toggle">
+                  <input id="setPermWindow" type="checkbox" checked/>
+                  <div class="ios-track"></div><div class="ios-thumb"></div>
+                </label>
+              </div>
+              <div class="set-perm-row">
+                <span>System metrics</span>
+                <label class="ios-toggle">
+                  <input id="setPermSystem" type="checkbox" checked/>
+                  <div class="ios-track"></div><div class="ios-thumb"></div>
+                </label>
               </div>
             </div>
           </div>
 
-          <div class="dashboard-content full-only no-drag">
-            <div class="dashboard-header">
-              <div class="mode-switch">
-                <button id="modeIconBtn" class="mode-btn" type="button">Icon</button>
-                <button id="modeMiniBtn" class="mode-btn" type="button">Mini</button>
-                <button id="modeFullBtn" class="mode-btn" type="button">Full</button>
-              </div>
-              <button id="openSettingsBtn" class="settings-toggle-btn" type="button">⚙</button>
-            </div>
-
-            <section class="state-card">
-              <div class="state-header">
-                <h2 id="stateText" class="state-title">Connecting...</h2>
-                <p id="stateConfidence" class="state-confidence">--%</p>
-              </div>
-              <p class="state-message" id="stateMessage">Initializing session...</p>
-            </section>
-
-            <section class="metrics-grid">
-              <article class="metric-card">
-                <span class="metric-label">Typing</span>
-                <strong class="metric-value" id="typingSpeed">-</strong>
-              </article>
-              <article class="metric-card">
-                <span class="metric-label">Mouse</span>
-                <strong class="metric-value" id="mouseSpeed">-</strong>
-              </article>
-              <article class="metric-card">
-                <span class="metric-label">Window switches</span>
-                <strong class="metric-value" id="focusSwitches">-</strong>
-              </article>
-              <article class="metric-card">
-                <span class="metric-label">System load</span>
-                <strong class="metric-value" id="cpuValue">-</strong>
-              </article>
-            </section>
-
-            <section class="details-section">
-              <p class="section-title">Session details</p>
-              <div class="details-row"><span>State</span><strong id="stateChip">normal</strong></div>
-              <div class="details-row"><span>Confidence</span><strong id="confidencePercent">--%</strong></div>
-              <div class="details-row"><span>Signal quality</span><strong id="signalText">balanced</strong></div>
-            </section>
-
-            <section id="settingsPanel" class="settings-panel no-drag">
-              <div class="settings-group">
-                <h4>Visual controls</h4>
-                <label class="slider-label">Blur
-                  <input id="blurRange" type="range" min="8" max="32" value="20" />
-                </label>
-                <label class="slider-label">Refraction
-                  <input id="refractRange" type="range" min="0" max="30" value="10" />
-                </label>
-                <label class="slider-label">Depth
-                  <input id="depthRange" type="range" min="6" max="30" value="18" />
-                </label>
-              </div>
-              <div class="settings-group">
-                <h4>Session permissions</h4>
-                <label class="checkbox-label"><input id="setPermKeyboard" type="checkbox" checked /> Keyboard</label>
-                <label class="checkbox-label"><input id="setPermMouse" type="checkbox" checked /> Mouse</label>
-                <label class="checkbox-label"><input id="setPermWindow" type="checkbox" checked /> Window</label>
-                <label class="checkbox-label"><input id="setPermSystem" type="checkbox" checked /> System</label>
-              </div>
-              <div class="settings-group">
-                <h4>About CogniSense</h4>
-                <p class="copy">Glassmorphic, permission-conscious focus coaching that adapts to your system theme and stays quiet until you need it.</p>
-              </div>
-            </section>
+          <div>
+            <div class="settings-group-title">About</div>
+            <p class="about-block">CogniSense v1.0 — Cognitive state detection that runs 100% on-device. No cloud, no keylogging, no screen reading. Just rhythm and movement patterns.</p>
           </div>
-        </div>
-      </section>
-    </main>
 
-    <script src="renderer.js"></script>
-  </body>
+        </div>
+      </div>
+
+    </div><!-- /full-wrap -->
+  </section>
+
+</main>
+<script src="renderer.js"></script>
+</body>
 </html>
