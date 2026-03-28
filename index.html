@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CogniSense</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="widget" id="widget" data-state="connecting">
+      <header class="header drag-region">
+        <div class="brand-wrap">
+          <span class="active-dot" id="activeDot" aria-hidden="true"></span>
+          <span class="app-name">CogniSense</span>
+        </div>
+        <div class="header-right no-drag">
+          <span class="status-pill" id="statusPill">Active</span>
+          <div class="window-controls">
+            <button id="minBtn" class="control-btn" aria-label="Minimize">-</button>
+            <button id="closeBtn" class="control-btn close" aria-label="Close">x</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="state-section">
+        <p class="section-label">CURRENT COGNITIVE STATE</p>
+        <div class="state-row">
+          <h1 id="stateText" class="state-text">Connecting...</h1>
+          <div class="confidence-wrap">
+            <span id="confidenceText" class="confidence-text">--%</span>
+            <span class="confidence-sub">confidence</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="selector-section no-drag" aria-label="State selector">
+        <button id="selectorFocus" class="selector-pill" type="button">Focus</button>
+        <button id="selectorFatigue" class="selector-pill" type="button">Fatigue</button>
+        <button id="selectorConfused" class="selector-pill" type="button">Confused</button>
+      </section>
+
+      <section class="signal-section">
+        <div class="signal-meta">
+          <span class="section-label">Signal Strength</span>
+          <span id="signalPercent" class="signal-value">0%</span>
+        </div>
+        <div class="signal-track">
+          <div class="signal-fill" id="signalFill"></div>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <strong id="sessionStat">--m</strong>
+          <span>Session</span>
+        </article>
+        <article class="stat-card">
+          <strong id="inStateStat">--m</strong>
+          <span>In State</span>
+        </article>
+        <article class="stat-card">
+          <strong id="breakStat">--m</strong>
+          <span>Break Due</span>
+        </article>
+      </section>
+
+      <section class="suggestions-card" id="suggestionsCard">
+        <div class="suggestion-icon" id="suggestionIcon">💡</div>
+        <div>
+          <h2 id="suggestionTitle" class="suggestion-title">Connecting to engine</h2>
+          <p id="suggestionDesc" class="suggestion-desc">Waiting for cognitive stream and signal confidence.</p>
+          <button class="suggestion-action no-drag" id="suggestionAction" type="button">Set reminder -></button>
+        </div>
+      </section>
+
+      <section class="metrics-row">
+        <span>Type <strong id="typingSpeed">-</strong></span>
+        <span>Mouse <strong id="mouseSpeed">-</strong></span>
+        <span>Switch <strong id="focusSwitches">-</strong></span>
+        <span>CPU <strong id="cpuValue">-</strong></span>
+      </section>
+
+      <footer class="footer-buttons no-drag">
+        <button type="button" class="footer-btn">Overview</button>
+        <button type="button" class="footer-btn">Dashboard</button>
+        <button type="button" class="footer-btn">Settings</button>
+      </footer>
+    </main>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

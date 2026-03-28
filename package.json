@@ -1,0 +1,19 @@
+{
+  "name": "cognitive-widget",
+  "version": "1.0.0",
+  "description": "Minimal Electron cognitive state widget",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "electron",
+    "widget",
+    "fastapi"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^32.1.2"
+  }
+}
