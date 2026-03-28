@@ -154,20 +154,15 @@
   <section id="pageFeature" class="page">
 
     <!-- ── ICON view ── -->
-    <div class="icon-wrap drag-region">
-      <div style="position:relative; display:flex; align-items:center; justify-content:center;">
-        <div class="icon-ring"></div>
-        <div class="icon-ring"></div>
-        <div class="icon-ring"></div>
-        <div class="icon-orb" id="iconOrb" data-letter="F"></div>
-      </div>
+    <div class="icon-wrap drag-region" id="iconWrap">
+      <div class="icon-dot no-drag" id="iconDot" title="Click to expand"></div>
     </div>
 
     <!-- ── MINI view ── -->
     <div class="mini-wrap">
-      <div class="mini-state-row">
-        <span class="mini-state-name" id="miniStateName">Focused</span>
-        <span class="mini-conf-pill"  id="miniConf">91%</span>
+      <div class="mini-state-row drag-region">
+        <span class="mini-state-name no-drag" id="miniStateName">Focused</span>
+        <span class="mini-conf-pill no-drag"  id="miniConf">91%</span>
       </div>
       <p class="mini-msg" id="miniMsg">Deep focus detected</p>
 

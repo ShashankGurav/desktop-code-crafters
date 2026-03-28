@@ -56,7 +56,7 @@ const miniCpu       = document.getElementById('miniCpu');
 const miniTime      = document.getElementById('miniTime');
 
 // Icon view
-const iconOrb = document.getElementById('iconOrb');
+const iconDot = document.getElementById('iconDot');
 
 // Glass sliders
 const blurRange   = document.getElementById('blurRange');
@@ -83,7 +83,7 @@ const STATE_LABELS = {
   focused:    'Focused',
   flow:       'In Flow',
   normal:     'Normal',
-  distracted: 'Distracted',
+  distracted: 'Normal',
   stressed:   'Stressed',
   idle:       'Idle',
   connecting: 'Connecting',
@@ -92,8 +92,8 @@ const STATE_LABELS = {
 const STATE_MESSAGES = {
   focused:    'Deep focus detected — keep it up',
   flow:       'You\'re in the zone ⚡',
-  normal:     'Working at a healthy pace',
-  distracted: 'Possible distraction detected',
+  normal:     'Tracking...',
+  distracted: 'Tracking...',
   stressed:   'High error rate — consider a break',
   idle:       'No activity detected',
   connecting: 'Waiting for backend...',
@@ -170,8 +170,7 @@ function applyState(data) {
   panel.dataset.state = rawState;
   statusPill.textContent = rawState === 'connecting' ? 'Waiting' : 'Active';
 
-  // ── Icon view
-  iconOrb.dataset.letter = initial;
+  // ── Icon view (dot just pulses, no letter needed)
 
   // ── Mini view
   miniStateName.textContent = label;
@@ -242,8 +241,8 @@ modeFullBtn.addEventListener('click', () => setPanelMode('full'));
 if (miniToIcon) miniToIcon.addEventListener('click', () => setPanelMode('icon'));
 if (miniToFull) miniToFull.addEventListener('click', () => setPanelMode('full'));
 
-// Icon orb click → mini
-iconOrb.addEventListener('click', () => setPanelMode('mini'));
+// Icon dot click → mini
+iconDot.addEventListener('click', () => setPanelMode('mini'));
 
 // Window controls
 minBtn.addEventListener('click',   () => window.desktopWindow?.minimize());

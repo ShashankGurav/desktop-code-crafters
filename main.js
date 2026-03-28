@@ -4,7 +4,7 @@ const path = require('path');
 let mainWindow;
 
 const PANEL_SIZES = {
-  icon: { width: 80,  height: 80  },
+  icon: { width: 20,  height: 20  },
   mini: { width: 360, height: 280 },
   full: { width: 520, height: 760 },
 };
@@ -58,10 +58,12 @@ ipcMain.on('window:set-size', (_e, mode) => {
   const [x, y] = mainWindow.getPosition();
   mainWindow.setBounds({ x, y, width: size.width, height: size.height }, true);
 
-  // Orb mode: circular, always-on-top floating
   if (mode === 'icon') {
     mainWindow.setAlwaysOnTop(true, 'screen-saver');
+    mainWindow.setHasShadow(false);
+    mainWindow.setBackgroundColor('#00000000');
   } else {
     mainWindow.setAlwaysOnTop(true, 'floating');
+    mainWindow.setHasShadow(true);
   }
 });
