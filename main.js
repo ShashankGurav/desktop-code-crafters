@@ -3,14 +3,16 @@ const path = require('path');
 
 let mainWindow;
 
+const PANEL_SIZES = {
+  icon: { width: 96, height: 96 },
+  mini: { width: 360, height: 260 },
+  full: { width: 520, height: 740 }
+};
+
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 330,
-    height: 230,
-    minWidth: 330,
-    minHeight: 230,
-    maxWidth: 330,
-    maxHeight: 230,
+    width: PANEL_SIZES.full.width,
+    height: PANEL_SIZES.full.height,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -55,4 +57,19 @@ ipcMain.on('window:close', () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.close();
   }
+});
+
+ipcMain.on('window:set-size', (_event, mode) => {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    return;
+  }
+
+  const size = PANEL_SIZES[mode] || PANEL_SIZES.full;
+  const [x, y] = mainWindow.getPosition();
+  mainWindow.setBounds({
+    x,
+    y,
+    width: size.width,
+    height: size.height
+  });
 });

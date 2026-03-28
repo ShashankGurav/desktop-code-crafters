@@ -7,84 +7,166 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main class="widget" id="widget" data-state="connecting">
-      <header class="header drag-region">
-        <div class="brand-wrap">
-          <span class="active-dot" id="activeDot" aria-hidden="true"></span>
-          <span class="app-name">CogniSense</span>
+    <main class="panel panel-full" id="panel" data-state="connecting">
+      <header class="topbar drag-region">
+        <div class="brand">
+          <span class="brand-dot" aria-hidden="true"></span>
+          <span class="brand-name">CogniSense</span>
         </div>
-        <div class="header-right no-drag">
-          <span class="status-pill" id="statusPill">Active</span>
-          <div class="window-controls">
-            <button id="minBtn" class="control-btn" aria-label="Minimize">-</button>
-            <button id="closeBtn" class="control-btn close" aria-label="Close">x</button>
-          </div>
+        <div class="topbar-actions no-drag">
+          <span class="status-pill" id="statusPill">Session</span>
+          <button id="minBtn" class="window-btn" aria-label="Minimize">-</button>
+          <button id="closeBtn" class="window-btn" aria-label="Close">x</button>
         </div>
       </header>
 
-      <section class="state-section">
-        <p class="section-label">CURRENT COGNITIVE STATE</p>
-        <div class="state-row">
-          <h1 id="stateText" class="state-text">Connecting...</h1>
-          <div class="confidence-wrap">
-            <span id="confidenceText" class="confidence-text">--%</span>
-            <span class="confidence-sub">confidence</span>
+      <section id="pageOnboarding" class="page active">
+        <p class="eyebrow">Welcome</p>
+        <h1 class="headline">Your calm cognitive companion.</h1>
+        <p class="copy">CogniSense observes activity patterns and keeps this panel calm while guiding you through three brief screens—onboarding, permissions, and the live feature view.</p>
+        <ul class="bullet-list">
+          <li>Private local agent</li>
+          <li>Real-time state updates</li>
+          <li>Non-intrusive floating panel</li>
+        </ul>
+        <button id="toPermissionsBtn" class="primary-btn" type="button">Continue</button>
+      </section>
+
+      <section id="pagePermissions" class="page">
+        <p class="eyebrow">Permissions</p>
+        <h2 class="title">Choose what this session can read</h2>
+        <div class="permission-grid">
+          <label class="permission-item"><input id="permKeyboard" type="checkbox" checked /> Keyboard activity</label>
+          <label class="permission-item"><input id="permMouse" type="checkbox" checked /> Mouse activity</label>
+          <label class="permission-item"><input id="permWindow" type="checkbox" checked /> Window focus</label>
+          <label class="permission-item"><input id="permSystem" type="checkbox" checked /> System metrics</label>
+        </div>
+        <p class="copy">Adjust any of these as you move toward the live session. You can revisit them later inside Settings on the feature screen.</p>
+        <div class="row-actions">
+          <button id="backToOnboardingBtn" class="ghost-btn" type="button">Back</button>
+          <button id="toFeatureBtn" class="primary-btn" type="button">Start Session</button>
+        </div>
+      </section>
+
+      <section id="pageFeature" class="page">
+        <div id="iconModeCard" class="icon-mode-card drag-region">
+          <div class="icon-orb" id="iconOrb">C</div>
+        </div>
+
+        <div id="mainDashboard" class="dashboard-grid">
+          <div class="compact-view drag-region">
+            <div class="compact-header">
+              <div class="compact-title-group">
+                <span class="state-badge" id="compactStateBadge">FATIGUE</span>
+                <p class="compact-time" id="compactTime">--:--</p>
+              </div>
+              <button id="compactMenuBtn" class="compact-menu-btn no-drag" type="button">⋮</button>
+            </div>
+            <p class="compact-message" id="compactMessage">Monitoring...</p>
+            <div class="compact-video">
+              <div class="video-screen">
+                <div class="video-hud">Live Focus Stream</div>
+                <div class="video-bars">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="video-glow"></div>
+              </div>
+              <div class="video-highlights">
+                <article>
+                  <span>Focus</span>
+                  <strong id="compactConfidence">--%</strong>
+                </article>
+                <article>
+                  <span>Rhythm</span>
+                  <strong id="compactActivity">-</strong>
+                </article>
+                <article>
+                  <span>Motion</span>
+                  <strong id="compactMotion">-</strong>
+                </article>
+                <article>
+                  <span>Signal</span>
+                  <strong id="compactSignal">-</strong>
+                </article>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-content full-only no-drag">
+            <div class="dashboard-header">
+              <div class="mode-switch">
+                <button id="modeIconBtn" class="mode-btn" type="button">Icon</button>
+                <button id="modeMiniBtn" class="mode-btn" type="button">Mini</button>
+                <button id="modeFullBtn" class="mode-btn" type="button">Full</button>
+              </div>
+              <button id="openSettingsBtn" class="settings-toggle-btn" type="button">⚙</button>
+            </div>
+
+            <section class="state-card">
+              <div class="state-header">
+                <h2 id="stateText" class="state-title">Connecting...</h2>
+                <p id="stateConfidence" class="state-confidence">--%</p>
+              </div>
+              <p class="state-message" id="stateMessage">Initializing session...</p>
+            </section>
+
+            <section class="metrics-grid">
+              <article class="metric-card">
+                <span class="metric-label">Typing</span>
+                <strong class="metric-value" id="typingSpeed">-</strong>
+              </article>
+              <article class="metric-card">
+                <span class="metric-label">Mouse</span>
+                <strong class="metric-value" id="mouseSpeed">-</strong>
+              </article>
+              <article class="metric-card">
+                <span class="metric-label">Window switches</span>
+                <strong class="metric-value" id="focusSwitches">-</strong>
+              </article>
+              <article class="metric-card">
+                <span class="metric-label">System load</span>
+                <strong class="metric-value" id="cpuValue">-</strong>
+              </article>
+            </section>
+
+            <section class="details-section">
+              <p class="section-title">Session details</p>
+              <div class="details-row"><span>State</span><strong id="stateChip">normal</strong></div>
+              <div class="details-row"><span>Confidence</span><strong id="confidencePercent">--%</strong></div>
+              <div class="details-row"><span>Signal quality</span><strong id="signalText">balanced</strong></div>
+            </section>
+
+            <section id="settingsPanel" class="settings-panel no-drag">
+              <div class="settings-group">
+                <h4>Visual controls</h4>
+                <label class="slider-label">Blur
+                  <input id="blurRange" type="range" min="8" max="32" value="20" />
+                </label>
+                <label class="slider-label">Refraction
+                  <input id="refractRange" type="range" min="0" max="30" value="10" />
+                </label>
+                <label class="slider-label">Depth
+                  <input id="depthRange" type="range" min="6" max="30" value="18" />
+                </label>
+              </div>
+              <div class="settings-group">
+                <h4>Session permissions</h4>
+                <label class="checkbox-label"><input id="setPermKeyboard" type="checkbox" checked /> Keyboard</label>
+                <label class="checkbox-label"><input id="setPermMouse" type="checkbox" checked /> Mouse</label>
+                <label class="checkbox-label"><input id="setPermWindow" type="checkbox" checked /> Window</label>
+                <label class="checkbox-label"><input id="setPermSystem" type="checkbox" checked /> System</label>
+              </div>
+              <div class="settings-group">
+                <h4>About CogniSense</h4>
+                <p class="copy">Glassmorphic, permission-conscious focus coaching that adapts to your system theme and stays quiet until you need it.</p>
+              </div>
+            </section>
           </div>
         </div>
       </section>
-
-      <section class="selector-section no-drag" aria-label="State selector">
-        <button id="selectorFocus" class="selector-pill" type="button">Focus</button>
-        <button id="selectorFatigue" class="selector-pill" type="button">Fatigue</button>
-        <button id="selectorConfused" class="selector-pill" type="button">Confused</button>
-      </section>
-
-      <section class="signal-section">
-        <div class="signal-meta">
-          <span class="section-label">Signal Strength</span>
-          <span id="signalPercent" class="signal-value">0%</span>
-        </div>
-        <div class="signal-track">
-          <div class="signal-fill" id="signalFill"></div>
-        </div>
-      </section>
-
-      <section class="stats-grid">
-        <article class="stat-card">
-          <strong id="sessionStat">--m</strong>
-          <span>Session</span>
-        </article>
-        <article class="stat-card">
-          <strong id="inStateStat">--m</strong>
-          <span>In State</span>
-        </article>
-        <article class="stat-card">
-          <strong id="breakStat">--m</strong>
-          <span>Break Due</span>
-        </article>
-      </section>
-
-      <section class="suggestions-card" id="suggestionsCard">
-        <div class="suggestion-icon" id="suggestionIcon">💡</div>
-        <div>
-          <h2 id="suggestionTitle" class="suggestion-title">Connecting to engine</h2>
-          <p id="suggestionDesc" class="suggestion-desc">Waiting for cognitive stream and signal confidence.</p>
-          <button class="suggestion-action no-drag" id="suggestionAction" type="button">Set reminder -></button>
-        </div>
-      </section>
-
-      <section class="metrics-row">
-        <span>Type <strong id="typingSpeed">-</strong></span>
-        <span>Mouse <strong id="mouseSpeed">-</strong></span>
-        <span>Switch <strong id="focusSwitches">-</strong></span>
-        <span>CPU <strong id="cpuValue">-</strong></span>
-      </section>
-
-      <footer class="footer-buttons no-drag">
-        <button type="button" class="footer-btn">Overview</button>
-        <button type="button" class="footer-btn">Dashboard</button>
-        <button type="button" class="footer-btn">Settings</button>
-      </footer>
     </main>
 
     <script src="renderer.js"></script>

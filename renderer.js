@@ -1,251 +1,248 @@
-const widget = document.getElementById('widget');
+const panel = document.getElementById('panel');
+const pageOnboarding = document.getElementById('pageOnboarding');
+const pagePermissions = document.getElementById('pagePermissions');
+const pageFeature = document.getElementById('pageFeature');
+
+const toPermissionsBtn = document.getElementById('toPermissionsBtn');
+const backToOnboardingBtn = document.getElementById('backToOnboardingBtn');
+const toFeatureBtn = document.getElementById('toFeatureBtn');
+
+const minBtn = document.getElementById('minBtn');
+const closeBtn = document.getElementById('closeBtn');
+const openSettingsBtn = document.getElementById('openSettingsBtn');
+const compactMenuBtn = document.getElementById('compactMenuBtn');
+const settingsPanel = document.getElementById('settingsPanel');
 const statusPill = document.getElementById('statusPill');
+
+const modeIconBtn = document.getElementById('modeIconBtn');
+const modeMiniBtn = document.getElementById('modeMiniBtn');
+const modeFullBtn = document.getElementById('modeFullBtn');
+
+// Full view elements
 const stateText = document.getElementById('stateText');
-const confidenceText = document.getElementById('confidenceText');
-const signalFill = document.getElementById('signalFill');
-const signalPercent = document.getElementById('signalPercent');
+const stateConfidence = document.getElementById('stateConfidence');
+const stateMessage = document.getElementById('stateMessage');
+const stateChip = document.getElementById('stateChip');
+const confidencePercent = document.getElementById('confidencePercent');
+const signalText = document.getElementById('signalText');
+
+// Compact view elements
+const compactStateBadge = document.getElementById('compactStateBadge');
+const compactTime = document.getElementById('compactTime');
+const compactMessage = document.getElementById('compactMessage');
+const compactConfidence = document.getElementById('compactConfidence');
+const compactActivity = document.getElementById('compactActivity');
+const compactSignal = document.getElementById('compactSignal');
+const compactMotion = document.getElementById('compactMotion');
 
 const typingSpeed = document.getElementById('typingSpeed');
 const mouseSpeed = document.getElementById('mouseSpeed');
 const focusSwitches = document.getElementById('focusSwitches');
 const cpuValue = document.getElementById('cpuValue');
 
-const sessionStat = document.getElementById('sessionStat');
-const inStateStat = document.getElementById('inStateStat');
-const breakStat = document.getElementById('breakStat');
-
-const suggestionIcon = document.getElementById('suggestionIcon');
-const suggestionTitle = document.getElementById('suggestionTitle');
-const suggestionDesc = document.getElementById('suggestionDesc');
-const suggestionAction = document.getElementById('suggestionAction');
-
-const selectorFocus = document.getElementById('selectorFocus');
-const selectorFatigue = document.getElementById('selectorFatigue');
-const selectorConfused = document.getElementById('selectorConfused');
-
-const minBtn = document.getElementById('minBtn');
-const closeBtn = document.getElementById('closeBtn');
+const blurRange = document.getElementById('blurRange');
+const refractRange = document.getElementById('refractRange');
+const depthRange = document.getElementById('depthRange');
 
 const API_URL = 'http://127.0.0.1:8000/latest';
 const POLL_MS = 3000;
+const FLOW_KEY = 'cognisense_flow_complete';
 
-const stateConfig = {
-  focused: {
-    label: 'Focused',
-    suggestion: {
-      icon: '🔥',
-      title: 'Momentum detected',
-      desc: 'Protect your flow with one focused block and no context switching.',
-      action: 'Set reminder ->'
-    }
-  },
-  distracted: {
-    label: 'Distracted',
-    suggestion: {
-      icon: '🧭',
-      title: 'Attention drift',
-      desc: 'Too many switches. Close one tab cluster and pick one next action.',
-      action: 'Open focus plan ->'
-    }
-  },
-  fatigued: {
-    label: 'Fatigued',
-    suggestion: {
-      icon: '🫧',
-      title: 'Energy is dropping',
-      desc: 'Take a 5-minute break and hydrate before your next sprint.',
-      action: 'Set reminder ->'
-    }
-  },
-  idle: {
-    label: 'Idle',
-    suggestion: {
-      icon: '🌙',
-      title: 'Low activity',
-      desc: 'System is mostly idle. Resume with a tiny first task.',
-      action: 'Start quick task ->'
-    }
-  },
-  normal: {
-    label: 'Normal',
-    suggestion: {
-      icon: '🌊',
-      title: 'Stable rhythm',
-      desc: 'Good baseline. Push one high-impact task in the next 20 minutes.',
-      action: 'Open dashboard ->'
-    }
-  },
-  connecting: {
-    label: 'Connecting...',
-    suggestion: {
-      icon: '💡',
-      title: 'Connecting to engine',
-      desc: 'Waiting for cognitive stream and signal confidence.',
-      action: 'Set reminder ->'
-    }
-  }
+const permissionIds = [
+  ['permKeyboard', 'setPermKeyboard'],
+  ['permMouse', 'setPermMouse'],
+  ['permWindow', 'setPermWindow'],
+  ['permSystem', 'setPermSystem']
+];
+
+const modeButtons = {
+  icon: modeIconBtn,
+  mini: modeMiniBtn,
+  full: modeFullBtn
 };
 
+function showPage(page) {
+  [pageOnboarding, pagePermissions, pageFeature].forEach((el) => {
+    el.classList.toggle('active', el === page);
+  });
+}
+
+function syncPermissions(fromId, toId) {
+  const from = document.getElementById(fromId);
+  const to = document.getElementById(toId);
+  if (!from || !to) {
+    return;
+  }
+  to.checked = from.checked;
+}
+
+function setPanelMode(mode) {
+  panel.classList.remove('panel-icon', 'panel-mini', 'panel-full');
+  panel.classList.add(`panel-${mode}`);
+  Object.entries(modeButtons).forEach(([key, btn]) => {
+    btn.classList.toggle('active', key === mode);
+  });
+  window.desktopWindow.setPanelMode(mode);
+}
+
+function applyVisualSettings() {
+  document.documentElement.style.setProperty('--blur', `${blurRange.value}px`);
+  document.documentElement.style.setProperty('--refraction', `${refractRange.value}px`);
+  document.documentElement.style.setProperty('--depth', `${depthRange.value}px`);
+}
+
 function toNumber(value, fallback = 0) {
-  const num = Number(value);
-  return Number.isFinite(num) ? num : fallback;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
 }
 
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function formatMetric(value, suffix = '') {
-  if (!Number.isFinite(value)) {
-    return '-';
-  }
-  return `${value.toFixed(1)}${suffix}`;
-}
-
-function animateWidgetUpdate() {
-  widget.classList.remove('state-updated');
-  void widget.offsetWidth;
-  widget.classList.add('state-updated');
-}
-
-function setSelectorState(stateKey) {
-  selectorFocus.classList.toggle('active', stateKey === 'focused');
-  selectorFatigue.classList.toggle('active', stateKey === 'fatigued');
-  selectorConfused.classList.toggle('active', stateKey === 'distracted');
-}
-
-function computeConfidence(summary, stateKey) {
-  const keyboard = summary.keyboard || {};
-  const focus = summary.focus || {};
-  const stateIndicators = summary.state_indicators || {};
-
-  const typing = toNumber(keyboard.typing_speed);
-  const switches = toNumber(focus.switches);
-  const idleRatio = toNumber(stateIndicators.idle_ratio);
-
-  let score = 58 + typing * 6 - switches * 4 - idleRatio * 38;
-
-  if (stateKey === 'focused') {
-    score += 12;
-  } else if (stateKey === 'distracted') {
-    score -= 10;
-  } else if (stateKey === 'fatigued') {
-    score -= 7;
-  }
-
-  return Math.round(clamp(score, 15, 99));
-}
-
-function applySuggestion(stateKey) {
-  const cfg = stateConfig[stateKey] || stateConfig.normal;
-  suggestionIcon.textContent = cfg.suggestion.icon;
-  suggestionTitle.textContent = cfg.suggestion.title;
-  suggestionDesc.textContent = cfg.suggestion.desc;
-  suggestionAction.textContent = cfg.suggestion.action;
-}
-
-function setSessionStats(summary) {
-  const keyboard = summary.keyboard || {};
-  const focus = summary.focus || {};
-  const stateIndicators = summary.state_indicators || {};
-
-  const switches = toNumber(focus.switches);
-  const keys = toNumber(keyboard.total_keys);
-  const idleRatio = toNumber(stateIndicators.idle_ratio);
-
-  const sessionMinutes = Math.max(1, Math.round(28 + switches * 1.4 + keys * 0.05));
-  const inStateMinutes = Math.max(1, Math.round(sessionMinutes * (1 - idleRatio * 0.7)));
-  const breakDueMinutes = Math.max(2, Math.round(45 - idleRatio * 30 - switches * 1.2));
-
-  sessionStat.textContent = `${sessionMinutes}m`;
-  inStateStat.textContent = `${inStateMinutes}m`;
-  breakStat.textContent = `${breakDueMinutes}m`;
+function getStateMessage(state, signals) {
+  const messages = {
+    focused: '🎯 Deep focus detected',
+    flow: '⚡ In the zone',
+    normal: '😊 Working normally',
+    distracted: '📱 Possible distraction',
+    idle: '😴 Idle time',
+    connecting: '🔄 Initializing...'
+  };
+  return messages[state] || `${state.charAt(0).toUpperCase() + state.slice(1)}`;
 }
 
 function applyState(data) {
   const summary = data?.summary || {};
-  const backendState = String(data?.state || 'normal').toLowerCase();
-  const stateKey = stateConfig[backendState] ? backendState : 'normal';
-  const cfg = stateConfig[stateKey];
+  const features = data?.features || {};
+  const stateResult = data?.state_result || {};
+  const state = String(stateResult.state || data?.state || 'normal');
+  const confidence = Math.round(toNumber(stateResult.confidence, 0) * 100);
 
-  const confidence = computeConfidence(summary, stateKey);
+  // Get current time
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-  widget.dataset.state = stateKey;
-  stateText.textContent = cfg.label;
-  confidenceText.textContent = `${confidence}%`;
-  signalPercent.textContent = `${confidence}%`;
-  signalFill.style.width = `${confidence}%`;
+  panel.dataset.state = state.toLowerCase();
   statusPill.textContent = 'Active';
+  
+  const stateDisplay = state.charAt(0).toUpperCase() + state.slice(1);
+  stateText.textContent = stateDisplay;
+  stateConfidence.textContent = `${confidence}%`;
+  stateChip.textContent = state;
+  confidencePercent.textContent = `${confidence}%`;
 
-  const keyboard = summary.keyboard || {};
-  const mouse = summary.mouse || {};
-  const focus = summary.focus || {};
-  const system = summary.system || {};
+  const signals = Array.isArray(stateResult.signals) ? stateResult.signals : [];
+  const signalDisplay = signals.slice(0, 2).join(', ') || 'balanced';
+  signalText.textContent = signalDisplay;
 
-  typingSpeed.textContent = formatMetric(toNumber(keyboard.typing_speed), 'k/s');
-  mouseSpeed.textContent = formatMetric(toNumber(mouse.avg_speed), 'px/s');
-  focusSwitches.textContent = `${Math.round(toNumber(focus.switches))}`;
-  cpuValue.textContent = formatMetric(toNumber(system.avg_cpu), '%');
+  const typing = toNumber(summary?.keyboard?.typing_speed).toFixed(2);
+  const mouse = toNumber(summary?.mouse?.avg_speed).toFixed(1);
+  const switches = Math.round(toNumber(summary?.focus?.switches));
+  const cpu = toNumber(summary?.system?.avg_cpu).toFixed(1);
 
-  setSelectorState(stateKey);
-  setSessionStats(summary);
-  applySuggestion(stateKey);
-  animateWidgetUpdate();
+  typingSpeed.textContent = `${typing}k/s`;
+  mouseSpeed.textContent = `${mouse}px/s`;
+  focusSwitches.textContent = `${switches}`;
+  cpuValue.textContent = `${cpu}%`;
+
+  // Update compact view
+  compactStateBadge.textContent = state.toUpperCase();
+  compactTime.textContent = timeStr;
+  compactMessage.textContent = getStateMessage(state, signals);
+  compactConfidence.textContent = `${confidence}%`;
+  compactActivity.textContent = `${typing}k/s`;
+  compactMotion.textContent = `${mouse}px/s`;
+  compactSignal.textContent = signals.length > 0 ? '✓' : '○';
+
+  // Update full view message
+  stateMessage.textContent = getStateMessage(state, signals);
+
+  if (!features || Object.keys(features).length === 0) {
+    signalText.textContent = 'low_data';
+    compactSignal.textContent = '○';
+  }
 }
 
-function setConnectingState() {
-  widget.dataset.state = 'connecting';
+function setConnecting() {
+  panel.dataset.state = 'connecting';
   statusPill.textContent = 'Waiting';
-  stateText.textContent = stateConfig.connecting.label;
-  confidenceText.textContent = '--%';
-  signalPercent.textContent = '0%';
-  signalFill.style.width = '0%';
-
+  stateText.textContent = 'Connecting';
+  stateConfidence.textContent = '--%';
+  stateChip.textContent = 'connecting';
+  confidencePercent.textContent = '--%';
+  stateMessage.textContent = 'Initializing session...';
+  signalText.textContent = 'backend_offline';
   typingSpeed.textContent = '-';
   mouseSpeed.textContent = '-';
   focusSwitches.textContent = '-';
   cpuValue.textContent = '-';
-  sessionStat.textContent = '--m';
-  inStateStat.textContent = '--m';
-  breakStat.textContent = '--m';
 
-  setSelectorState('connecting');
-  applySuggestion('connecting');
+  // Compact view
+  compactStateBadge.textContent = 'WAITING';
+  compactMessage.textContent = 'Connecting to backend...';
+  compactConfidence.textContent = '--%';
+  compactActivity.textContent = '-';
+  compactMotion.textContent = '-';
+  compactSignal.textContent = '○';
 }
 
 async function fetchState() {
-  const res = await fetch(API_URL, { method: 'GET' });
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status}`);
+  const response = await fetch(API_URL, { method: 'GET' });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
   }
-  return res.json();
+  return response.json();
 }
 
 async function refresh() {
   try {
     const data = await fetchState();
     applyState(data);
-  } catch (_) {
-    setConnectingState();
+  } catch (_error) {
+    setConnecting();
   }
 }
 
-minBtn.addEventListener('click', () => {
-  window.desktopWindow.minimize();
+toPermissionsBtn.addEventListener('click', () => showPage(pagePermissions));
+backToOnboardingBtn.addEventListener('click', () => showPage(pageOnboarding));
+
+toFeatureBtn.addEventListener('click', () => {
+  sessionStorage.setItem(FLOW_KEY, '1');
+  showPage(pageFeature);
+  setPanelMode('full');
 });
 
-closeBtn.addEventListener('click', () => {
-  window.desktopWindow.close();
+permissionIds.forEach(([left, right]) => {
+  const leftEl = document.getElementById(left);
+  const rightEl = document.getElementById(right);
+  leftEl.addEventListener('change', () => syncPermissions(left, right));
+  rightEl.addEventListener('change', () => syncPermissions(right, left));
 });
 
-suggestionAction.addEventListener('click', () => {
-  animateWidgetUpdate();
+[blurRange, refractRange, depthRange].forEach((el) => {
+  el.addEventListener('input', applyVisualSettings);
 });
 
-selectorFocus.addEventListener('click', () => setSelectorState('focused'));
-selectorFatigue.addEventListener('click', () => setSelectorState('fatigued'));
-selectorConfused.addEventListener('click', () => setSelectorState('distracted'));
+openSettingsBtn.addEventListener('click', () => {
+  settingsPanel.classList.toggle('open');
+});
 
-setConnectingState();
+compactMenuBtn.addEventListener('click', () => {
+  settingsPanel.classList.toggle('open');
+});
+
+modeIconBtn.addEventListener('click', () => setPanelMode('icon'));
+modeMiniBtn.addEventListener('click', () => setPanelMode('mini'));
+modeFullBtn.addEventListener('click', () => setPanelMode('full'));
+
+minBtn.addEventListener('click', () => window.desktopWindow.minimize());
+closeBtn.addEventListener('click', () => window.desktopWindow.close());
+
+if (sessionStorage.getItem(FLOW_KEY) === '1') {
+  showPage(pageFeature);
+  setPanelMode('full');
+} else {
+  showPage(pageOnboarding);
+}
+
+applyVisualSettings();
+setConnecting();
 refresh();
 setInterval(refresh, POLL_MS);
