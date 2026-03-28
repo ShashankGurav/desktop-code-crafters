@@ -313,6 +313,37 @@ class RawCollector:
         with self._lock:
             return time.time() - self.last_active_time
 
+    def trim_old_data(self, keep_seconds: int = 300) -> None:
+        """Trims stale raw events so long-running sessions do not grow memory unbounded."""
+        cutoff = time.time() - keep_seconds
+        with self._lock:
+            self._trim_old_data_locked(cutoff)
+
+    def _trim_old_data_locked(self, cutoff: float) -> None:
+        """Applies in-place trimming for all raw signal buffers using one cutoff timestamp."""
+        self.key_press_times = [(t, k) for t, k in self.key_press_times if t > cutoff]
+        self.key_release_times = [(t, k) for t, k in self.key_release_times if t > cutoff]
+        self.error_key_times = [t for t in self.error_key_times if t > cutoff]
+        self.modifier_key_times = [t for t in self.modifier_key_times if t > cutoff]
+        self.mouse_positions = [(t, x, y) for t, x, y in self.mouse_positions if t > cutoff]
+        self.click_events = [(t, x, y, b, d) for t, x, y, b, d in self.click_events if t > cutoff]
+        self.click_corrections = [t for t in self.click_corrections if t > cutoff]
+        self.scroll_events = [(t, dy, dr) for t, dy, dr in self.scroll_events if t > cutoff]
+        self.mouse_pauses = [(ts, dur) for ts, dur in self.mouse_pauses if ts > cutoff]
+        self.window_switches = [(t, a, ti) for t, a, ti in self.window_switches if t > cutoff]
+        self.system_snapshots = [(t, c, r) for t, c, r in self.system_snapshots if t > cutoff]
+
+        # Keep current burst metadata coherent with trimmed key history.
+        if self._last_key_time is not None and self._last_key_time <= cutoff:
+            self._last_key_time = None
+            self._burst_start = None
+            self._burst_count = 0
+
+        if self._last_mouse_t is not None and self._last_mouse_t <= cutoff:
+            self._last_mouse_t = None
+            self._in_mouse_pause = False
+            self._mouse_pause_start = None
+
     def flush_window(self, seconds=60):
         """
         Returns a dict of raw lists sliced to the last `seconds` window.
@@ -321,7 +352,7 @@ class RawCollector:
         cutoff = time.time() - seconds
         with self._lock:
             idle_duration = time.time() - self.last_active_time
-            return {
+            payload = {
                 "key_presses":      [(t, k) for t, k in self.key_press_times   if t > cutoff],
                 "key_releases":     [(t, k) for t, k in self.key_release_times if t > cutoff],
                 "error_keys":       [t       for t    in self.error_key_times   if t > cutoff],
@@ -337,6 +368,8 @@ class RawCollector:
                 "idle_duration":    idle_duration,
                 "window_sec":       seconds,
             }
+            self._trim_old_data_locked(time.time() - 300)
+            return payload
 
     # ── Start ─────────────────────────────────────────────────────────────────
 

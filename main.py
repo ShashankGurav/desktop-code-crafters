@@ -4,7 +4,9 @@ from typing import Dict, List, Tuple
 
 from buffer_manager import BufferManager
 from collector import RawCollector
+from feature_extractor import FeatureExtractor
 from sender import send_to_backend
+from session_memory import SessionMemory
 
 
 WINDOW_SECONDS = 30
@@ -130,18 +132,96 @@ def build_summary(raw: Dict) -> Dict:
     return _round_floats(summary)
 
 
-def detect_state(summary: Dict) -> str:
+def _clamp(value: float, min_value: float = 0.0, max_value: float = 1.0) -> float:
+    return max(min_value, min(max_value, value))
+
+
+def _normalized_margin(value: float, threshold: float, strong_value: float) -> float:
+    if strong_value == threshold:
+        return 1.0
+    margin = (value - threshold) / (strong_value - threshold)
+    return _clamp(margin)
+
+
+def _inverse_margin(value: float, threshold: float, strong_value: float) -> float:
+    if threshold == strong_value:
+        return 1.0
+    margin = (threshold - value) / (threshold - strong_value)
+    return _clamp(margin)
+
+
+def detect_state(summary: Dict, features: Dict[str, float]) -> Dict[str, object]:
     total_keys = int(summary["keyboard"]["total_keys"])
     switches = int(summary["focus"]["switches"])
     idle_ratio = float(summary["state_indicators"]["idle_ratio"])
+    error_rate = float(features.get("error_rate", 0.0))
+    iki_std = float(features.get("iki_std", 0.0))
+    iki_mean = float(features.get("iki_mean", 0.0))
 
-    if idle_ratio > 0.6:
-        return "idle"
-    if switches > 5:
-        return "distracted"
-    if total_keys > 40:
-        return "focused"
-    return "normal"
+    if idle_ratio > 0.65:
+        confidence = _normalized_margin(idle_ratio, 0.65, 1.0)
+        return {
+            "state": "idle",
+            "confidence": round(confidence, 4),
+            "signals": ["idle_ratio", "typing_speed", "pause_density"],
+        }
+
+    if error_rate > 0.15 and iki_std > 0.3 and iki_std > iki_mean:
+        c1 = _normalized_margin(error_rate, 0.15, 0.35)
+        c2 = _normalized_margin(iki_std, 0.3, 0.8)
+        c3 = _normalized_margin(iki_std - iki_mean, 0.0, 0.5)
+        confidence = (c1 + c2 + c3) / 3.0
+        return {
+            "state": "stressed",
+            "confidence": round(confidence, 4),
+            "signals": ["error_rate", "iki_std", "iki_mean"],
+        }
+
+    if switches > 6 or (switches > 3 and iki_std > 0.25):
+        if switches > 6:
+            c1 = _normalized_margin(float(switches), 6.0, 12.0)
+            c2 = _normalized_margin(iki_std, 0.1, 0.45)
+        else:
+            c1 = _normalized_margin(float(switches), 3.0, 8.0)
+            c2 = _normalized_margin(iki_std, 0.25, 0.6)
+        confidence = (c1 + c2) / 2.0
+        return {
+            "state": "distracted",
+            "confidence": round(confidence, 4),
+            "signals": ["focus_switches", "iki_std", "error_rate"],
+        }
+
+    if total_keys > 60 and iki_std < 0.12 and error_rate < 0.05:
+        c1 = _normalized_margin(float(total_keys), 60.0, 100.0)
+        c2 = _inverse_margin(iki_std, 0.12, 0.02)
+        c3 = _inverse_margin(error_rate, 0.05, 0.0)
+        confidence = (c1 + c2 + c3) / 3.0
+        return {
+            "state": "flow",
+            "confidence": round(confidence, 4),
+            "signals": ["total_keys", "iki_std", "error_rate"],
+        }
+
+    if total_keys > 35 and iki_std < 0.2:
+        c1 = _normalized_margin(float(total_keys), 35.0, 75.0)
+        c2 = _inverse_margin(iki_std, 0.2, 0.05)
+        confidence = (c1 + c2) / 2.0
+        return {
+            "state": "focused",
+            "confidence": round(confidence, 4),
+            "signals": ["total_keys", "iki_std", "switch_rate"],
+        }
+
+    normal_conf = 1.0 - max(
+        _normalized_margin(idle_ratio, 0.65, 1.0),
+        _normalized_margin(error_rate, 0.15, 0.35),
+        _normalized_margin(float(switches), 6.0, 12.0),
+    )
+    return {
+        "state": "normal",
+        "confidence": round(_clamp(normal_conf), 4),
+        "signals": ["balanced_signals", "idle_ratio", "focus_switches"],
+    }
 
 
 def compress_raw(data: Dict) -> Dict:
@@ -178,14 +258,22 @@ def log_snapshot(summary: Dict, state: str) -> None:
     print()
     print("==============================")
 
-def build_payload(raw: Dict, summary: Dict, session_duration: float) -> Dict:
-    state = detect_state(summary)
+def build_payload(
+    raw: Dict,
+    summary: Dict,
+    features: Dict[str, float],
+    state_result: Dict[str, object],
+    session_duration: float,
+) -> Dict:
+    state = str(state_result.get("state", "normal"))
     sample = compress_raw(raw)
     return {
         "timestamp": int(time.time()),
         "session_duration": round(session_duration, 2),
         "summary": summary,
+        "features": features,
         "state": state,
+        "state_result": state_result,
         "raw_sample": sample,
     }
 
@@ -193,6 +281,8 @@ def build_payload(raw: Dict, summary: Dict, session_duration: float) -> Dict:
 def run_loop() -> None:
     collector = RawCollector()
     buffer = BufferManager()
+    feature_extractor = FeatureExtractor()
+    memory = SessionMemory(max_windows=20)
 
     collector.start()
     print("[INFO] RawCollector started.")
@@ -201,12 +291,15 @@ def run_loop() -> None:
         time.sleep(WINDOW_SECONDS)
 
         raw = collector.flush_window(WINDOW_SECONDS)
+        features = feature_extractor.extract(raw)
         summary = build_summary(raw)
+        state_result = detect_state(summary, features)
         session_duration = time.time() - collector.session_start
-        payload = build_payload(raw, summary, session_duration)
+        payload = build_payload(raw, summary, features, state_result, session_duration)
         summary = payload["summary"]
         state = payload["state"]
 
+        memory.push(payload)
         buffer.add(payload)
         print("[INFO] Data collected")
         log_snapshot(summary, state)
