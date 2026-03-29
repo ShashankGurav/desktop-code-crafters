@@ -31,7 +31,7 @@ if (!gotSingleInstanceLock) {
 const PANEL_SIZES = {
   icon: { width: 20,  height: 20  },
   mini: { width: 360, height: 280 },
-  full: { width: 520, height: 760 },
+  full: { width: 520, height: 600 },
 };
 
 function createWindow() {
@@ -98,4 +98,10 @@ ipcMain.on('window:set-size', (_e, mode) => {
     mainWindow.setAlwaysOnTop(true, 'floating');
     mainWindow.setHasShadow(true);
   }
+});
+
+ipcMain.on('window:move', (_e, { x, y }) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  const [cx, cy] = mainWindow.getPosition();
+  mainWindow.setPosition(Math.round(cx + x), Math.round(cy + y));
 });

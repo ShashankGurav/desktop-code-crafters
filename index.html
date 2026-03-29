@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="glass">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -16,6 +16,11 @@
       <span class="brand-name">CogniSense</span>
     </div>
     <div class="topbar-actions no-drag">
+      <span class="traffic-lights" aria-hidden="true">
+        <span class="traffic-dot traffic-dot-red"></span>
+        <span class="traffic-dot traffic-dot-yellow"></span>
+        <span class="traffic-dot traffic-dot-green"></span>
+      </span>
       <span class="status-pill" id="statusPill">Session</span>
       <button id="minBtn"   class="window-btn" aria-label="Minimize">−</button>
       <button id="closeBtn" class="window-btn" aria-label="Close">✕</button>
@@ -155,7 +160,7 @@
 
     <!-- ── ICON view ── -->
     <div class="icon-wrap drag-region" id="iconWrap">
-      <div class="icon-dot no-drag" id="iconDot" title="Click to expand"></div>
+      <div class="icon-dot" id="iconDot" title="Click to expand"></div>
     </div>
 
     <!-- ── MINI view ── -->
@@ -226,9 +231,10 @@
       <!-- Hero -->
       <div class="hero-card">
         <div class="hero-glow"></div>
+        <p class="hero-eyebrow">Cognitive State</p>
         <div class="hero-top">
           <h2 class="hero-state" id="heroState">Connecting</h2>
-          <span class="hero-conf" id="heroConf">--%</span>
+          <span class="hero-conf" id="heroConf">--% confidence</span>
         </div>
         <p class="hero-msg" id="heroMsg">Initializing session...</p>
         <div class="conf-bar-bg">
@@ -236,64 +242,58 @@
         </div>
       </div>
 
+      <div class="metrics-section-title">Metrics</div>
+
       <!-- Metrics -->
       <div class="metrics-section">
-        <div class="metric-card">
-          <div class="metric-accent purple">⌨️</div>
-          <div class="metric-label">Typing speed</div>
-          <div>
-            <span class="metric-value" id="fullTyping">—</span>
-            <span class="metric-unit">k/s</span>
-          </div>
-          <div class="metric-sub" id="fullTypingSub">—</div>
-        </div>
         <div class="metric-card">
           <div class="metric-accent teal">🖱</div>
           <div class="metric-label">Mouse speed</div>
           <div>
-            <span class="metric-value" id="fullMouse">—</span>
-            <span class="metric-unit">px/s</span>
+            <span class="metric-value metric-value-accent" id="fullMouse">—</span>
+            <span class="metric-unit">px/sec</span>
           </div>
-          <div class="metric-sub" id="fullMouseSub">—</div>
+          <div class="metric-bar-chart" id="fullMouseBars" aria-hidden="true"></div>
         </div>
-        <div class="metric-card">
-          <div class="metric-accent amber">🪟</div>
-          <div class="metric-label">Window switches</div>
+        <div class="metric-card metric-card-compact">
+          <div class="metric-accent purple">⌫</div>
+          <div class="metric-label">Error rate</div>
           <div>
-            <span class="metric-value" id="fullSwitches">—</span>
-          </div>
-          <div class="metric-sub" id="fullSwitchesSub">per window</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-accent green">📊</div>
-          <div class="metric-label">System load</div>
-          <div>
-            <span class="metric-value" id="fullCpu">—</span>
+            <span class="metric-value metric-value-accent" id="fullErrorPct">—</span>
             <span class="metric-unit">%</span>
           </div>
-          <div class="metric-sub" id="fullCpuSub">—</div>
+          <div class="metric-sub" id="fullErrorSub">backspace ratio</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-accent green">♥</div>
+          <div class="metric-label">Heart rate</div>
+          <div>
+            <span class="metric-value" id="fullHeart">—</span>
+            <span class="metric-unit" id="fullHeartUnit">bpm</span>
+          </div>
+          <div class="metric-wave-wrap">
+            <svg class="metric-wave-svg" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
+              <path class="metric-wave-path" id="fullHeartWave" fill="none" stroke-width="1.25" vector-effect="non-scaling-stroke" d=""></path>
+            </svg>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-accent amber">◎</div>
+          <div class="metric-label">Stress level</div>
+          <div>
+            <span class="metric-value" id="fullStressText">— / 100</span>
+          </div>
+          <div class="metric-curve-wrap">
+            <svg class="metric-curve-svg" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
+              <path class="metric-curve-path" id="fullStressCurve" fill="none" stroke-width="1.35" vector-effect="non-scaling-stroke" d=""></path>
+            </svg>
+          </div>
         </div>
       </div>
 
-      <!-- Details -->
-      <div class="details-card">
-        <div class="details-card-title">Session details</div>
-        <div class="detail-row">
-          <span>State</span>
-          <strong id="detailState">—</strong>
-        </div>
-        <div class="detail-row">
-          <span>Confidence</span>
-          <strong id="detailConf">—</strong>
-        </div>
-        <div class="detail-row">
-          <span>Driving signals</span>
-          <strong id="detailSignals">—</strong>
-        </div>
-        <div class="detail-row">
-          <span>Last updated</span>
-          <strong id="detailTime">—</strong>
-        </div>
+      <div class="full-footer">
+        <span id="fullSessionTime">Session: —</span>
+        <a href="#" class="full-footer-link" id="fullDashboardLink">Full dashboard →</a>
       </div>
 
       <!-- Settings panel -->
