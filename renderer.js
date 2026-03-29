@@ -1,79 +1,79 @@
 'use strict';
 
 /* ── DOM refs ─────────────────────────────────────── */
-const panel           = document.getElementById('panel');
-const statusPill      = document.getElementById('statusPill');
-const minBtn          = document.getElementById('minBtn');
-const closeBtn        = document.getElementById('closeBtn');
+const panel = document.getElementById('panel');
+const statusPill = document.getElementById('statusPill');
+const minBtn = document.getElementById('minBtn');
+const closeBtn = document.getElementById('closeBtn');
 
 // Pages
-const pageOnboarding  = document.getElementById('pageOnboarding');
+const pageOnboarding = document.getElementById('pageOnboarding');
 const pagePermissions = document.getElementById('pagePermissions');
-const pageFeature     = document.getElementById('pageFeature');
+const pageFeature = document.getElementById('pageFeature');
 
 // Nav buttons
-const toPermissionsBtn    = document.getElementById('toPermissionsBtn');
+const toPermissionsBtn = document.getElementById('toPermissionsBtn');
 const backToOnboardingBtn = document.getElementById('backToOnboardingBtn');
-const toFeatureBtn        = document.getElementById('toFeatureBtn');
+const toFeatureBtn = document.getElementById('toFeatureBtn');
 
 // Mode buttons
 const modeIconBtn = document.getElementById('modeIconBtn');
 const modeMiniBtn = document.getElementById('modeMiniBtn');
 const modeFullBtn = document.getElementById('modeFullBtn');
-const miniToIcon  = document.getElementById('miniToIcon');
-const miniToFull  = document.getElementById('miniToFull');
+const miniToIcon = document.getElementById('miniToIcon');
+const miniToFull = document.getElementById('miniToFull');
 
 // Settings
 const openSettingsBtn = document.getElementById('openSettingsBtn');
-const settingsPanel   = document.getElementById('settingsPanel');
+const settingsPanel = document.getElementById('settingsPanel');
 
 // Full view
-const heroState   = document.getElementById('heroState');
-const heroConf    = document.getElementById('heroConf');
-const heroMsg     = document.getElementById('heroMsg');
+const heroState = document.getElementById('heroState');
+const heroConf = document.getElementById('heroConf');
+const heroMsg = document.getElementById('heroMsg');
 const confBarFill = document.getElementById('confBarFill');
-const fullMouse       = document.getElementById('fullMouse');
-const fullErrorPct    = document.getElementById('fullErrorPct');
-const fullHeart       = document.getElementById('fullHeart');
-const fullHeartUnit   = document.getElementById('fullHeartUnit');
-const fullStressText  = document.getElementById('fullStressText');
-const fullMouseBars   = document.getElementById('fullMouseBars');
-const fullHeartWave   = document.getElementById('fullHeartWave');
+const fullMouse = document.getElementById('fullMouse');
+const fullErrorPct = document.getElementById('fullErrorPct');
+const fullHeart = document.getElementById('fullHeart');
+const fullHeartUnit = document.getElementById('fullHeartUnit');
+const fullStressText = document.getElementById('fullStressText');
+const fullMouseBars = document.getElementById('fullMouseBars');
+const fullHeartWave = document.getElementById('fullHeartWave');
 const fullStressCurve = document.getElementById('fullStressCurve');
 const fullSessionTime = document.getElementById('fullSessionTime');
 const fullDashboardLink = document.getElementById('fullDashboardLink');
 
 // Mini view
 const miniStateName = document.getElementById('miniStateName');
-const miniConf      = document.getElementById('miniConf');
-const miniMsg       = document.getElementById('miniMsg');
-const miniTyping    = document.getElementById('miniTyping');
-const miniMouse     = document.getElementById('miniMouse');
-const miniSwitches  = document.getElementById('miniSwitches');
-const miniCpu       = document.getElementById('miniCpu');
-const miniTime      = document.getElementById('miniTime');
+const miniConf = document.getElementById('miniConf');
+const miniMsg = document.getElementById('miniMsg');
+const miniTyping = document.getElementById('miniTyping');
+const miniMouse = document.getElementById('miniMouse');
+const miniSwitches = document.getElementById('miniSwitches');
+const miniCpu = document.getElementById('miniCpu');
+const miniTime = document.getElementById('miniTime');
 
 // Icon view
 const iconDot = document.getElementById('iconDot');
 
 // Glass sliders
-const blurRange   = document.getElementById('blurRange');
-const refractRange= document.getElementById('refractRange');
-const depthRange  = document.getElementById('depthRange');
-const blurVal     = document.getElementById('blurVal');
-const refractVal  = document.getElementById('refractVal');
-const depthVal    = document.getElementById('depthVal');
+const blurRange = document.getElementById('blurRange');
+const refractRange = document.getElementById('refractRange');
+const depthRange = document.getElementById('depthRange');
+const blurVal = document.getElementById('blurVal');
+const refractVal = document.getElementById('refractVal');
+const depthVal = document.getElementById('depthVal');
 
 // Permission pairs [onboarding id, settings id]
 const PERM_PAIRS = [
   ['permKeyboard', 'setPermKeyboard'],
-  ['permMouse',    'setPermMouse'],
-  ['permWindow',   'setPermWindow'],
-  ['permSystem',   'setPermSystem'],
+  ['permMouse', 'setPermMouse'],
+  ['permWindow', 'setPermWindow'],
+  ['permSystem', 'setPermSystem'],
 ];
 
-const API_URL  = 'http://127.0.0.1:8001/latest';
-const POLL_MS  = 3000;
+const API_URL = 'http://127.0.0.1:8001/latest';
+const POLL_MS = 3000;
 const FLOW_KEY = 'cognisense_onboarded';
 const COGNITIVE_BASE_URL = 'http://127.0.0.1:6100';
 const COGNITIVE_FALLBACK_BASE_URL = 'http://localhost:6100';
@@ -136,29 +136,29 @@ const CAMERA_CONSTRAINT_PROFILES = [
 
 /* ── State labels & messages ─────────────────────── */
 const STATE_LABELS = {
-  focused:    'Focused',
-  flow:       'In Flow',
-  normal:     'Normal',
+  focused: 'Focused',
+  flow: 'In Flow',
+  normal: 'Normal',
   distracted: 'Normal',
-  stressed:   'Stressed',
-  idle:       'Idle',
+  stressed: 'Stressed',
+  idle: 'Idle',
   connecting: 'Connecting',
 };
 
 const STATE_MESSAGES = {
-  focused:    'Deep focus detected — keep it up',
-  flow:       'You\'re in the zone ⚡',
-  normal:     'Tracking...',
+  focused: 'Deep focus detected — keep it up',
+  flow: 'You\'re in the zone ⚡',
+  normal: 'Tracking...',
   distracted: 'Tracking...',
-  stressed:   'High error rate — consider a break',
-  idle:       'No activity detected',
+  stressed: 'High error rate — consider a break',
+  idle: 'No activity detected',
   connecting: 'Waiting for backend...',
 };
 
 /* ── Helpers ─────────────────────────────────────── */
-const cap   = s  => STATE_LABELS[s] || (s.charAt(0).toUpperCase() + s.slice(1));
+const cap = s => STATE_LABELS[s] || (s.charAt(0).toUpperCase() + s.slice(1));
 const toNum = (v, fb = 0) => { const n = Number(v); return Number.isFinite(n) ? n : fb; };
-const now   = () => new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+const now = () => new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
 function formatSessionDuration(seconds) {
   const s = Math.max(0, Math.floor(toNum(seconds, 0)));
@@ -288,7 +288,7 @@ function setPanelMode(mode) {
 
   // Sync mode button active states (full view)
   [modeIconBtn, modeMiniBtn, modeFullBtn].forEach((btn, i) => {
-    if (btn) btn.classList.toggle('active', ['icon','mini','full'][i] === mode);
+    if (btn) btn.classList.toggle('active', ['icon', 'mini', 'full'][i] === mode);
   });
 
   if (window.desktopWindow) window.desktopWindow.setPanelMode(mode);
@@ -299,41 +299,41 @@ function applyGlass() {
   const b = blurRange.value;
   const r = refractRange.value;
   const d = depthRange.value;
-  document.documentElement.style.setProperty('--blur',       `${b}px`);
+  document.documentElement.style.setProperty('--blur', `${b}px`);
   document.documentElement.style.setProperty('--refraction', `${r}px`);
-  document.documentElement.style.setProperty('--depth',      `${d}px`);
-  blurVal.textContent    = b;
+  document.documentElement.style.setProperty('--depth', `${d}px`);
+  blurVal.textContent = b;
   refractVal.textContent = r;
-  depthVal.textContent   = d;
+  depthVal.textContent = d;
 }
 
 /* ── Permission sync ─────────────────────────────── */
 function syncPerms(fromId, toId) {
   const from = document.getElementById(fromId);
-  const to   = document.getElementById(toId);
+  const to = document.getElementById(toId);
   if (from && to) to.checked = from.checked;
 }
 
 /* ── Apply data to UI ─────────────────────────────── */
 function applyState(data) {
-  const summary     = data?.summary      || {};
-  const features    = data?.features     || {};
+  const summary = data?.summary || {};
+  const features = data?.features || {};
   const stateResult = data?.state_result || {};
 
   const rawState = String(stateResult.state || data?.state || 'normal').toLowerCase();
-  const conf     = Math.round(toNum(stateResult.confidence, 0) * 100);
+  const conf = Math.round(toNum(stateResult.confidence, 0) * 100);
 
-  const typing   = toNum(summary?.keyboard?.typing_speed, 0).toFixed(2);
-  const mouse    = toNum(summary?.mouse?.avg_speed, 0).toFixed(1);
+  const typing = toNum(summary?.keyboard?.typing_speed, 0).toFixed(2);
+  const mouse = toNum(summary?.mouse?.avg_speed, 0).toFixed(1);
   const switches = Math.round(toNum(summary?.focus?.switches, 0));
-  const cpu      = toNum(summary?.system?.avg_cpu, 0).toFixed(1);
-  const label    = cap(rawState);
-  const msg      = STATE_MESSAGES[rawState] || label;
-  const time     = now();
+  const cpu = toNum(summary?.system?.avg_cpu, 0).toFixed(1);
+  const label = cap(rawState);
+  const msg = STATE_MESSAGES[rawState] || label;
+  const time = now();
 
-  const errRate   = toNum(features.error_rate, 0);
-  const errPct    = Math.round(errRate * 100);
-  const mouseNum  = toNum(summary?.mouse?.avg_speed, 0);
+  const errRate = toNum(features.error_rate, 0);
+  const errPct = Math.round(errRate * 100);
+  const mouseNum = toNum(summary?.mouse?.avg_speed, 0);
 
   const heartRaw =
     features.heart_rate ??
@@ -371,21 +371,21 @@ function applyState(data) {
 
   // ── Mini view
   miniStateName.textContent = label;
-  miniConf.textContent      = `${conf}%`;
-  miniMsg.textContent       = msg;
-  miniTyping.textContent    = typing;
-  miniMouse.textContent     = mouse;
-  miniSwitches.textContent  = String(switches);
-  miniCpu.textContent       = cpu;
-  miniTime.textContent      = time;
+  miniConf.textContent = `${conf}%`;
+  miniMsg.textContent = msg;
+  miniTyping.textContent = typing;
+  miniMouse.textContent = mouse;
+  miniSwitches.textContent = String(switches);
+  miniCpu.textContent = cpu;
+  miniTime.textContent = time;
 
   // ── Full view
-  heroState.textContent       = label;
-  heroConf.textContent        = `${conf}% confidence`;
-  heroMsg.textContent         = rawState === 'connecting' ? msg : '';
-  confBarFill.style.width     = `${conf}%`;
+  heroState.textContent = label;
+  heroConf.textContent = `${conf}% confidence`;
+  heroMsg.textContent = rawState === 'connecting' ? msg : '';
+  confBarFill.style.width = `${conf}%`;
 
-  fullMouse.textContent       = mouseNum.toFixed(0);
+  fullMouse.textContent = mouseNum.toFixed(0);
 
   if (heartRaw != null && Number.isFinite(Number(heartRaw))) {
     fullHeart.textContent = String(Math.round(Number(heartRaw)));
@@ -674,7 +674,7 @@ async function startVitalScan() {
     vitalStream = await openCameraWithFallback();
     if (vitalPreview) {
       vitalPreview.srcObject = vitalStream;
-      await vitalPreview.play().catch(() => {});
+      await vitalPreview.play().catch(() => { });
     }
 
     setVitalStatus(`Recording for ${VITAL_SCAN_SECONDS} seconds...`);
@@ -761,20 +761,11 @@ modeFullBtn.addEventListener('click', () => setPanelMode('full'));
 if (miniToIcon) miniToIcon.addEventListener('click', () => setPanelMode('icon'));
 if (miniToFull) miniToFull.addEventListener('click', () => setPanelMode('full'));
 
-// Icon dot click → mini (only if not dragging)
-iconDot.addEventListener('mousedown', (e) => {
-  const startX = e.screenX;
-  const startY = e.screenY;
-  function onUp(ev) {
-    window.removeEventListener('mouseup', onUp);
-    const dist = Math.hypot(ev.screenX - startX, ev.screenY - startY);
-    if (dist < 5) setPanelMode('mini');
-  }
-  window.addEventListener('mouseup', onUp);
-});
+// Icon dot click → expand to full
+iconDot.addEventListener('click', () => setPanelMode('full'));
 
 // Window controls
-minBtn.addEventListener('click',   () => window.desktopWindow?.minimize());
+minBtn.addEventListener('click', () => window.desktopWindow?.minimize());
 closeBtn.addEventListener('click', () => window.desktopWindow?.close());
 
 // Settings toggle
@@ -844,8 +835,9 @@ startVitalScheduler();
       target.closest('.no-drag')
     ) return;
 
-    e.preventDefault();
-    dragState = { startX: e.screenX, startY: e.screenY };
+    // Record start position — do NOT call e.preventDefault() here,
+    // as that would suppress mouseup/click events for tap detection.
+    dragState = { startX: e.screenX, startY: e.screenY, didDrag: false };
   });
 
   window.addEventListener('mousemove', (e) => {
