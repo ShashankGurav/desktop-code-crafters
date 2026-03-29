@@ -486,7 +486,20 @@ async def analyze_vitals(video: UploadFile = File(...)) -> Dict[str, Any]:
 def _ensure_bridge_session() -> str:
     global bridge_session_id
     if bridge_session_id:
-        return bridge_session_id
+        try:
+            chk = requests.get(
+                f"{COGNITIVE_BASE_URL}/api/v1/sessions",
+                params={"limit": 200, "external_user_id": "desktop-cognisense"},
+                timeout=10,
+            )
+            chk.raise_for_status()
+            sessions = (chk.json() or {}).get("sessions") or []
+            if any(str(s.get("id", "")).strip() == bridge_session_id for s in sessions):
+                return bridge_session_id
+            bridge_session_id = None
+        except Exception:
+            # If validation fails, recreate below.
+            bridge_session_id = None
 
     body = {
         "external_user_id": "desktop-cognisense",
@@ -529,6 +542,20 @@ async def bridge_vitals_scan(
                 data=data,
                 timeout=90,
             )
+
+        if up.status_code == 404:
+            # Session was likely cleared/recreated server-side; refresh and retry once.
+            bridge_session_id = None
+            sid = _ensure_bridge_session()
+            with open(temp_path, "rb") as f:
+                files = {"video": (os.path.basename(temp_path), f, "video/webm")}
+                data = {"duration_seconds": str(duration_seconds)}
+                up = requests.post(
+                    f"{COGNITIVE_BASE_URL}/api/v1/sessions/{sid}/face-scan/video",
+                    files=files,
+                    data=data,
+                    timeout=90,
+                )
 
         if up.ok:
             payload = up.json()

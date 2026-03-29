@@ -370,8 +370,8 @@ async function createBackendSessionWithFallback() {
           continue;
         }
 
-        sessionStorage.setItem(DESKTOP_SESSION_KEY, sessionId);
-        sessionStorage.setItem(DESKTOP_SESSION_BASE_KEY, host);
+        localStorage.setItem(DESKTOP_SESSION_KEY, sessionId);
+        localStorage.setItem(DESKTOP_SESSION_BASE_KEY, host);
         return { sessionId, host };
       } catch (err) {
         lastError = err instanceof Error ? err.message : 'network error';
@@ -403,8 +403,8 @@ async function uploadVitalVideo(blob) {
   console.log('[Vitals] Saved in cognitive backend via local bridge:', bridgePayload);
   return bridgePayload;
 
-  let sessionId = sessionStorage.getItem(DESKTOP_SESSION_KEY);
-  let activeBaseUrl = sessionStorage.getItem(DESKTOP_SESSION_BASE_KEY) || COGNITIVE_BASE_URL;
+  let sessionId = localStorage.getItem(DESKTOP_SESSION_KEY);
+  let activeBaseUrl = localStorage.getItem(DESKTOP_SESSION_BASE_KEY) || COGNITIVE_BASE_URL;
   if (!sessionId) {
     const created = await createBackendSessionWithFallback();
     sessionId = created.sessionId;
@@ -433,7 +433,7 @@ async function uploadVitalVideo(blob) {
           body: buildFormData(),
         }, 'Upload scan video fallback host');
         activeBaseUrl = COGNITIVE_FALLBACK_BASE_URL;
-        sessionStorage.setItem(DESKTOP_SESSION_BASE_KEY, activeBaseUrl);
+        localStorage.setItem(DESKTOP_SESSION_BASE_KEY, activeBaseUrl);
       } catch {
         response = null;
       }
@@ -444,7 +444,7 @@ async function uploadVitalVideo(blob) {
 
   if (response?.status === 404) {
     // Session may have been deleted on backend; recreate once and retry.
-    sessionStorage.removeItem(DESKTOP_SESSION_KEY);
+    localStorage.removeItem(DESKTOP_SESSION_KEY);
     const recreated = await createBackendSessionWithFallback();
     const retrySessionId = recreated.sessionId;
     activeBaseUrl = recreated.host;
