@@ -1,7 +1,32 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 
 let mainWindow;
+
+// Use temp-backed runtime dirs to avoid AppData cache permission/lock failures.
+const RUNTIME_ROOT = path.join(os.tmpdir(), 'cognisense-electron');
+const USER_DATA_DIR = path.join(RUNTIME_ROOT, 'userData');
+const SESSION_DATA_DIR = path.join(RUNTIME_ROOT, 'sessionData');
+
+try {
+  fs.mkdirSync(USER_DATA_DIR, { recursive: true });
+  fs.mkdirSync(SESSION_DATA_DIR, { recursive: true });
+  app.setPath('userData', USER_DATA_DIR);
+  app.setPath('sessionData', SESSION_DATA_DIR);
+} catch (err) {
+  // Keep default Electron paths if temp path setup fails.
+  console.warn('[WARN] Failed to set custom runtime dirs:', err);
+}
+
+app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
+
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+}
 
 const PANEL_SIZES = {
   icon: { width: 20,  height: 20  },
@@ -35,6 +60,13 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
+
+  app.on('second-instance', () => {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });

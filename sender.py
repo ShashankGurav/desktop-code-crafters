@@ -1,8 +1,9 @@
 import json
+import os
 from typing import Any, Dict, List
 import requests
 
-BACKEND_URL = "http://127.0.0.1:8000/data"
+BACKEND_URL = os.getenv("COGNISENSE_DATA_URL", "http://127.0.0.1:8001/data")
 DEBUG = False
 
 def send_to_backend(data: List[Dict[str, Any]]) -> bool:
@@ -18,6 +19,7 @@ def send_to_backend(data: List[Dict[str, Any]]) -> bool:
 
         payload_size = len(json.dumps(data))
         print(f"[DEBUG] Payload size: {payload_size} bytes\n")
+        print(f"[INFO] Sending to: {BACKEND_URL}")
 
         # ✅ Clean way to send JSON
         resp = requests.post(

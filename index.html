@@ -365,6 +365,21 @@
   </section>
 
 </main>
+
+<div class="vital-modal" id="vitalModal" aria-hidden="true">
+  <div class="vital-modal-backdrop" id="vitalModalBackdrop"></div>
+  <section class="vital-modal-card" role="dialog" aria-modal="true" aria-labelledby="vitalModalTitle">
+    <h3 id="vitalModalTitle">Vital Scan Request</h3>
+    <p class="vital-modal-copy">Please scan your face for 20 seconds so the backend can estimate visual fatigue and focus signals.</p>
+    <video id="vitalPreview" class="vital-preview" autoplay muted playsinline></video>
+    <p class="vital-status" id="vitalStatus">Ready to begin.</p>
+    <div class="vital-actions">
+      <button id="vitalRejectBtn" class="btn btn-ghost" type="button">Not Now</button>
+      <button id="vitalAcceptBtn" class="btn btn-primary" type="button">Start Scan</button>
+    </div>
+  </section>
+</div>
+
 <script src="renderer.js"></script>
 </body>
 </html>
