@@ -86,6 +86,7 @@ const VITAL_RETRY_INTERVAL_MS = 2 * 60 * 1000;
 const VITAL_SCAN_SECONDS = 20;
 const VITAL_FIRST_PROMPT_DELAY_MS = 15 * 1000;
 const CAMERA_FAILURE_COOLDOWN_MS = 5 * 60 * 1000;
+const SCAN_VITAL_TTL_MS = 20 * 60 * 1000;
 
 /** Rolling samples from live /latest polls (real collected metrics, not synthetic). */
 const HISTORY_CAP = 48;
@@ -108,6 +109,7 @@ let vitalStream = null;
 let nextVitalPromptAt = 0;
 let cameraFailureCount = 0;
 let cameraBlockedUntil = 0;
+let lastScanMetrics = null;
 
 const CAMERA_CONSTRAINT_PROFILES = [
   {
@@ -159,6 +161,41 @@ const STATE_MESSAGES = {
 const cap = s => STATE_LABELS[s] || (s.charAt(0).toUpperCase() + s.slice(1));
 const toNum = (v, fb = 0) => { const n = Number(v); return Number.isFinite(n) ? n : fb; };
 const now = () => new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+function toStressDisplay(v) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return null;
+  return n <= 1 ? Math.round(n * 100) : Math.round(n);
+}
+
+function updateLastScanMetrics(payload) {
+  const mm = (payload && typeof payload.missing_metrics === 'object') ? payload.missing_metrics : null;
+
+  const hrFromMissing = mm ? toNum(mm.avg_heart_rate, NaN) : NaN;
+  const stressFromMissing = mm ? toStressDisplay(mm.stress_index) : null;
+
+  // Video endpoint may return attention/fatigue without missing_metrics.
+  const fatigueSignal = toNum(payload?.fatigue_signal, NaN);
+  const stressFromFatigue = Number.isFinite(fatigueSignal)
+    ? Math.round(Math.max(0, Math.min(100, fatigueSignal <= 1 ? fatigueSignal * 100 : fatigueSignal)))
+    : null;
+
+  const nextHeart = Number.isFinite(hrFromMissing)
+    ? hrFromMissing
+    : (lastScanMetrics?.avg_heart_rate ?? null);
+
+  const nextStress = Number.isFinite(stressFromMissing)
+    ? stressFromMissing
+    : (Number.isFinite(stressFromFatigue) ? stressFromFatigue : (lastScanMetrics?.stress_index ?? null));
+
+  if (nextHeart == null && nextStress == null) return;
+
+  lastScanMetrics = {
+    ts: Date.now(),
+    avg_heart_rate: nextHeart,
+    stress_index: nextStress,
+  };
+}
 
 function formatSessionDuration(seconds) {
   const s = Math.max(0, Math.floor(toNum(seconds, 0)));
@@ -335,12 +372,17 @@ function applyState(data) {
   const errPct = Math.round(errRate * 100);
   const mouseNum = toNum(summary?.mouse?.avg_speed, 0);
 
+  const scanFresh = !!(lastScanMetrics && (Date.now() - lastScanMetrics.ts) <= SCAN_VITAL_TTL_MS);
+
   const heartRaw =
     features.heart_rate ??
     summary?.vitals?.avg_heart_rate ??
     summary?.vitals?.heart_rate ??
+    (scanFresh ? lastScanMetrics?.avg_heart_rate : null) ??
     null;
+
   const stressRaw =
+    (scanFresh ? lastScanMetrics?.stress_index : null) ??
     features.stress_index ??
     summary?.vitals?.stress_index ??
     null;
@@ -701,7 +743,8 @@ async function startVitalScan() {
           if (!videoBlob.size) {
             throw new Error('Recorded video is empty. Camera stream did not produce frames.');
           }
-          await uploadVitalVideo(videoBlob);
+          const persisted = await uploadVitalVideo(videoBlob);
+          updateLastScanMetrics(persisted);
           setVitalStatus('Scan complete. Check backend terminal output.');
           resolve();
         } catch (err) {
